@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace Kermalis.DLS2
 {
@@ -97,23 +98,23 @@ namespace Kermalis.DLS2
 
         public string GetHierarchy()
         {
-            string str = string.Empty;
+            var str = new StringBuilder();
             int tabLevel = 0;
             void ApplyTabLevel()
             {
                 for (int t = 0; t < tabLevel; t++)
                 {
-                    str += '\t';
+                    str.Append('\t');
                 }
             }
             void Recursion(IReadOnlyList<DLSChunk> parent, string listName)
             {
                 ApplyTabLevel();
-                str += $"{listName} ({parent.Count})";
+                str.Append($"{listName} ({parent.Count})");
                 tabLevel++;
                 foreach (DLSChunk c in parent)
                 {
-                    str += Environment.NewLine;
+                    str.AppendLine();
                     if (c is ListChunk lc)
                     {
                         Recursion(lc, $"{lc.ChunkName} '{lc.Identifier}'");
@@ -121,10 +122,10 @@ namespace Kermalis.DLS2
                     else
                     {
                         ApplyTabLevel();
-                        str += $"<{c.ChunkName}>";
+                        str.Append($"<{c.ChunkName}>");
                         if (c is InfoSubChunk ic)
                         {
-                            str += $" [\"{ic.Text}\"]";
+                            str.Append($" [\"{ic.Text}\"]");
                         }
                     }
                 }
@@ -133,7 +134,7 @@ namespace Kermalis.DLS2
 #pragma warning restore IDE0059 // Unnecessary assignment of a value
             }
             Recursion(this, "RIFF 'DLS '");
-            return str;
+            return str.ToString();
         }
 
         private uint UpdateSize()
