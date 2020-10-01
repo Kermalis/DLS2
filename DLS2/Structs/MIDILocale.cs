@@ -11,26 +11,28 @@ namespace Kermalis.DLS2
 
         public byte CC32
         {
-            get => (byte)(Bank_Raw & 127);
+            get => (byte)(Bank_Raw & 0x7F);
             set
             {
-                if (value > 127)
+                if (value > 0x7F)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                Instrument_Raw |= value;
+                Bank_Raw &= unchecked((uint)~0x7F);
+                Bank_Raw |= value;
             }
         }
         public byte CC0
         {
-            get => (byte)((Bank_Raw >> 7) & 127);
+            get => (byte)((Bank_Raw >> 7) & 0x7F);
             set
             {
-                if (value > 127)
+                if (value > 0x7F)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
-                Instrument_Raw |= (uint)(value << 7);
+                Bank_Raw &= unchecked((uint)~(0x7F << 7));
+                Bank_Raw |= (uint)(value << 7);
             }
         }
         public bool IsDrum
@@ -38,26 +40,26 @@ namespace Kermalis.DLS2
             get => (Bank_Raw >> 31) != 0;
             set
             {
-                const uint val = 1u << 31;
                 if (value)
                 {
-                    Instrument_Raw |= val;
+                    Bank_Raw |= 1u << 31;
                 }
                 else
                 {
-                    Instrument_Raw &= ~val;
+                    Bank_Raw &= ~(1 << 31);
                 }
             }
         }
         public byte Instrument
         {
-            get => (byte)(Instrument_Raw & 127);
+            get => (byte)(Instrument_Raw & 0x7F);
             set
             {
-                if (value > 127)
+                if (value > 0x7F)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
+                Instrument_Raw &= unchecked((uint)~0x7F);
                 Instrument_Raw |= value;
             }
         }
