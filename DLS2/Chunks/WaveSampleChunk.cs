@@ -19,6 +19,7 @@ namespace Kermalis.DLS2
         }
         internal WaveSampleChunk(EndianBinaryReader reader) : base("wsmp", reader)
         {
+            long endOffset = GetEndOffset(reader);
             uint byteSize = reader.ReadUInt32();
             if (byteSize != 20)
             {
@@ -34,11 +35,12 @@ namespace Kermalis.DLS2
             {
                 _loops.Add(new WaveSampleLoop(reader));
             }
+            EatRemainingBytes(reader, endOffset);
         }
 
         internal override void UpdateSize()
         {
-            Size = 4 // _byteSize
+            Size = 4 // byteSize
                 + 2 // UnityNote
                 + 2 // FineTune
                 + 4 // Gain

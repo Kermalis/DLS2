@@ -1,5 +1,4 @@
 ﻿using Kermalis.EndianBinaryIO;
-using System.IO;
 
 namespace Kermalis.DLS2
 {
@@ -19,22 +18,25 @@ namespace Kermalis.DLS2
         }
         internal RegionHeaderChunk(EndianBinaryReader reader) : base("rgnh", reader)
         {
-            if (Size != 12 && Size != 14)
-            {
-                throw new InvalidDataException();
-            }
+            long endOffset = GetEndOffset(reader);
             KeyRange = new Range(reader);
             VelocityRange = new Range(reader);
             Options = reader.ReadUInt16();
             KeyGroup = reader.ReadUInt16();
-            if (Size == 14)
+            if (Size >= 14) // Size of 12 is also valid
             {
                 Layer = reader.ReadUInt16();
             }
-            else
-            {
-                Size = 14; // We are now adding Layer
-            }
+            EatRemainingBytes(reader, endOffset);
+        }
+
+        internal override void UpdateSize()
+        {
+            Size = 4 // KeyRange
+                + 4 // VelocityRange
+                + 2 // Options
+                + 2 // KeyGroup
+                + 2; // Layer
         }
 
         internal override void Write(EndianBinaryWriter writer)

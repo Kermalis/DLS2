@@ -74,7 +74,7 @@ namespace Kermalis.DLS2
                 {
                     throw new InvalidDataException("DLS header was not found at the expected offset.");
                 }
-                _chunks = GetAllChunks(reader, reader.BaseStream.Position + (size - 4)); // Subtract 4 for the "DLS "
+                _chunks = DLSChunk.GetAllChunks(reader, reader.BaseStream.Position + (size - 4)); // Subtract 4 for the "DLS "
             }
 #if DEBUG
             Save(@"C:\Users\Kermalis\Documents\Emulation\GBA\Games\M\test2.dls");
@@ -145,56 +145,6 @@ namespace Kermalis.DLS2
                 size += c.Size + 8;
             }
             return size;
-        }
-
-        internal static List<DLSChunk> GetAllChunks(EndianBinaryReader reader, long endOffset)
-        {
-            var chunks = new List<DLSChunk>();
-            while (reader.BaseStream.Position < endOffset)
-            {
-                chunks.Add(SwitchNextChunk(reader));
-            }
-            if (reader.BaseStream.Position > endOffset)
-            {
-                throw new InvalidDataException();
-            }
-            return chunks;
-        }
-        private static DLSChunk SwitchNextChunk(EndianBinaryReader reader)
-        {
-            string str = reader.ReadString(4, false);
-            switch (str)
-            {
-                case "art1": return new Level1ArticulatorChunk(reader);
-                case "art2": return new Level2ArticulatorChunk(reader);
-                case "colh": return new CollectionHeaderChunk(reader);
-                case "dlid": return new DLSIDChunk(reader);
-                case "insh": return new InstrumentHeaderChunk(reader);
-                case "LIST": return new ListChunk(reader);
-                case "ptbl": return new PoolTableChunk(reader);
-                case "rgnh": return new RegionHeaderChunk(reader);
-                case "wlnk": return new WaveLinkChunk(reader);
-                case "wsmp": return new WaveSampleChunk(reader);
-                // InfoSubChunks
-                case "IARL":
-                case "IART":
-                case "ICMS":
-                case "ICMD":
-                case "ICOP":
-                case "ICRD":
-                case "IENG":
-                case "IGNR":
-                case "IKEY":
-                case "IMED":
-                case "INAM":
-                case "IPRD":
-                case "ISBJ":
-                case "ISFT":
-                case "ISRC":
-                case "ISRF":
-                case "ITCH": return new InfoSubChunk(str, reader);
-                default: return new UnsupportedChunk(str, reader);
-            }
         }
 
         public void Add(DLSChunk chunk)

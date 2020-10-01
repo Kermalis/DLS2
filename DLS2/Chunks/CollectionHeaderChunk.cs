@@ -1,5 +1,4 @@
 ﻿using Kermalis.EndianBinaryIO;
-using System.IO;
 
 namespace Kermalis.DLS2
 {
@@ -11,11 +10,14 @@ namespace Kermalis.DLS2
         internal CollectionHeaderChunk() : base("colh") { }
         public CollectionHeaderChunk(EndianBinaryReader reader) : base("colh", reader)
         {
-            if (Size != 4)
-            {
-                throw new InvalidDataException();
-            }
+            long endOffset = GetEndOffset(reader);
             NumInstruments = reader.ReadUInt32();
+            EatRemainingBytes(reader, endOffset);
+        }
+
+        internal override void UpdateSize()
+        {
+            Size = 4; // NumInstruments
         }
 
         internal override void Write(EndianBinaryWriter writer)

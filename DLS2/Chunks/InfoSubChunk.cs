@@ -30,7 +30,9 @@ namespace Kermalis.DLS2
         }
         internal InfoSubChunk(string name, EndianBinaryReader reader) : base(name, reader)
         {
-            _text = reader.ReadString((int)Size, true);
+            long endOffset = GetEndOffset(reader);
+            _text = reader.ReadStringNullTerminated();
+            EatRemainingBytes(reader, endOffset);
         }
 
         internal override void UpdateSize()

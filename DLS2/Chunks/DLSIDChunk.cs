@@ -1,6 +1,5 @@
 ﻿using Kermalis.EndianBinaryIO;
 using System;
-using System.IO;
 
 namespace Kermalis.DLS2
 {
@@ -27,11 +26,14 @@ namespace Kermalis.DLS2
         }
         public DLSIDChunk(EndianBinaryReader reader) : base("dlid", reader)
         {
-            if (Size != 16)
-            {
-                throw new InvalidDataException();
-            }
+            long endOffset = GetEndOffset(reader);
             DLSID = new DLSID(reader);
+            EatRemainingBytes(reader, endOffset);
+        }
+
+        internal override void UpdateSize()
+        {
+            Size = 16; // DLSID
         }
 
         internal override void Write(EndianBinaryWriter writer)

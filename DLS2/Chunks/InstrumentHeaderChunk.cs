@@ -1,5 +1,4 @@
 ﻿using Kermalis.EndianBinaryIO;
-using System.IO;
 
 namespace Kermalis.DLS2
 {
@@ -11,12 +10,16 @@ namespace Kermalis.DLS2
 
         internal InstrumentHeaderChunk(EndianBinaryReader reader) : base("insh", reader)
         {
-            if (Size != 12)
-            {
-                throw new InvalidDataException();
-            }
+            long endOffset = GetEndOffset(reader);
             NumRegions = reader.ReadUInt32();
             Locale = new MIDILocale(reader);
+            EatRemainingBytes(reader, endOffset);
+        }
+
+        internal override void UpdateSize()
+        {
+            Size = 4 // NumRegions
+                + 8; // Locale
         }
 
         internal override void Write(EndianBinaryWriter writer)

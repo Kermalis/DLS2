@@ -34,9 +34,9 @@ namespace Kermalis.DLS2
         }
         internal ListChunk(EndianBinaryReader reader) : base("LIST", reader)
         {
-            long endOffset = reader.BaseStream.Position + Size;
+            long endOffset = GetEndOffset(reader);
             Identifier = reader.ReadString(4, false);
-            _children = DLS.GetAllChunks(reader, endOffset);
+            _children = GetAllChunks(reader, endOffset);
         }
 
         internal override void UpdateSize()

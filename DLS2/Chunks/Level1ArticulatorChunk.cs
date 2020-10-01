@@ -12,6 +12,7 @@ namespace Kermalis.DLS2
 
         internal Level1ArticulatorChunk(EndianBinaryReader reader) : base("art1", reader)
         {
+            long endOffset = GetEndOffset(reader);
             uint byteSize = reader.ReadUInt32();
             if (byteSize != 8)
             {
@@ -23,11 +24,12 @@ namespace Kermalis.DLS2
             {
                 _connectionBlocks.Add(new ConnectionBlock(reader));
             }
+            EatRemainingBytes(reader, endOffset);
         }
 
         internal override void UpdateSize()
         {
-            Size = 4 // _byteSize
+            Size = 4 // byteSize
                 + 4 // _numConnectionBlocks
                 + (12 * _numConnectionBlocks); // _connectionBlocks
         }

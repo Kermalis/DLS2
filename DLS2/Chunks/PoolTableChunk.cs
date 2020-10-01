@@ -16,6 +16,7 @@ namespace Kermalis.DLS2
         }
         internal PoolTableChunk(EndianBinaryReader reader) : base("ptbl", reader)
         {
+            long endOffset = GetEndOffset(reader);
             uint byteSize = reader.ReadUInt32();
             if (byteSize != 8)
             {
@@ -27,11 +28,12 @@ namespace Kermalis.DLS2
             {
                 _poolCues.Add(reader.ReadUInt32());
             }
+            EatRemainingBytes(reader, endOffset);
         }
 
         internal override void UpdateSize()
         {
-            Size = 4 // _byteSize
+            Size = 4 // byteSize
                 + 4 // _numCues
                 + (4 * _numCues); // _poolCues
         }

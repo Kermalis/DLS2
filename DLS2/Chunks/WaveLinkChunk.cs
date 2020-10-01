@@ -1,5 +1,4 @@
 ﻿using Kermalis.EndianBinaryIO;
-using System.IO;
 
 namespace Kermalis.DLS2
 {
@@ -13,14 +12,20 @@ namespace Kermalis.DLS2
         public WaveLinkChunk() : base("wlnk") { }
         internal WaveLinkChunk(EndianBinaryReader reader) : base("wlnk", reader)
         {
-            if (Size != 12)
-            {
-                throw new InvalidDataException();
-            }
+            long endOffset = GetEndOffset(reader);
             Options = reader.ReadUInt16();
             PhaseGroup = reader.ReadUInt16();
             Channel = reader.ReadUInt32();
             TableIndex = reader.ReadUInt32();
+            EatRemainingBytes(reader, endOffset);
+        }
+
+        internal override void UpdateSize()
+        {
+            Size = 2 // Options
+                + 2 // PhaseGroup
+                + 4 // Channel
+                + 4; // TableIndex
         }
 
         internal override void Write(EndianBinaryWriter writer)
