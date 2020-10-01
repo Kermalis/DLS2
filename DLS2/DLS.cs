@@ -82,6 +82,10 @@ namespace Kermalis.DLS2
 #endif
         }
 
+        public void UpdateCollectionHeader()
+        {
+            CollectionHeader.NumInstruments = (uint)InstrumentList.Count;
+        }
         /// <summary>Updates the pointers in the <see cref="PoolTable"/>. Should be called after modifying <see cref="WavePool"/>.</summary>
         public void UpdatePoolTable()
         {
@@ -99,6 +103,7 @@ namespace Kermalis.DLS2
         }
         public void Save(string path)
         {
+            UpdateCollectionHeader();
             UpdatePoolTable();
 
             using (var writer = new EndianBinaryWriter(File.Open(path, FileMode.Create)))
