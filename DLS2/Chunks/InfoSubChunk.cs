@@ -1,10 +1,28 @@
 ﻿using Kermalis.EndianBinaryIO;
+using System;
+using System.Linq;
 
 namespace Kermalis.DLS2
 {
     public sealed class InfoSubChunk : DLSChunk
     {
-        public string Text { get; set; } // TODO: Verify setter, update size
+        private string _text;
+        public string Text
+        {
+            get => _text;
+            set
+            {
+                if (value is null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                if (value.Any(c => c > sbyte.MaxValue))
+                {
+                    throw new ArgumentException("Text must be ASCII");
+                }
+                _text = value;
+            }
+        }
 
         public InfoSubChunk(string name, string text) : base(name)
         {
@@ -12,12 +30,12 @@ namespace Kermalis.DLS2
         }
         internal InfoSubChunk(string name, EndianBinaryReader reader) : base(name, reader)
         {
-            Text = reader.ReadString((int)Size, true);
+            _text = reader.ReadString((int)Size, true);
         }
 
         internal override void UpdateSize()
         {
-            Size = (uint)Text.Length + 1; // +1 for \0
+            Size = (uint)_text.Length + 1; // +1 for \0
             if (Size % 2 == 1) // Align by 2 bytes
             {
                 Size++;
@@ -27,7 +45,7 @@ namespace Kermalis.DLS2
         internal override void Write(EndianBinaryWriter writer)
         {
             base.Write(writer);
-            writer.Write(Text, (int)Size);
+            writer.Write(_text, (int)Size);
         }
     }
 }
