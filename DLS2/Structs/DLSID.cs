@@ -1,5 +1,6 @@
 ﻿using Kermalis.EndianBinaryIO;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Kermalis.DLS2
@@ -89,7 +90,17 @@ namespace Kermalis.DLS2
         }
         public override int GetHashCode()
         {
+            // .NET Standard does not have this method
+#if DEBUG
             return HashCode.Combine(Data1, Data2, Data3, Data4);
+#else
+            int hashCode = -0x8CAC62A;
+            hashCode = hashCode * -0x5AAAAAD7 + Data1.GetHashCode();
+            hashCode = hashCode * -0x5AAAAAD7 + Data2.GetHashCode();
+            hashCode = hashCode * -0x5AAAAAD7 + Data3.GetHashCode();
+            hashCode = hashCode * -0x5AAAAAD7 + EqualityComparer<byte[]>.Default.GetHashCode(Data4);
+            return hashCode;
+#endif
         }
         public override string ToString()
         {
