@@ -1,6 +1,8 @@
 ﻿using Kermalis.EndianBinaryIO;
 using System;
+#if !DEBUG
 using System.Collections.Generic;
+#endif
 using System.Linq;
 
 namespace Kermalis.DLS2
