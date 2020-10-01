@@ -1,5 +1,4 @@
 ﻿using Kermalis.EndianBinaryIO;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Kermalis.DLS2
@@ -9,13 +8,14 @@ namespace Kermalis.DLS2
         public ushort UnityNote { get; set; }
         public short FineTune { get; set; }
         public int Gain { get; set; }
-        public uint Options { get; set; }
-        public uint SampleLoops { get; }
-        private readonly List<WaveSampleLoop> _loops;
+        public WaveSampleOptions Options { get; set; }
+
+        public WaveSampleLoop Loop { get; set; } // Combining "SampleLoops" and the loop list
 
         public WaveSampleChunk() : base("wsmp")
         {
-            _loops = new List<WaveSampleLoop>();
+            UnityNote = 60;
+            Loop = null;
         }
         internal WaveSampleChunk(EndianBinaryReader reader) : base("wsmp", reader)
         {
@@ -28,12 +28,10 @@ namespace Kermalis.DLS2
             UnityNote = reader.ReadUInt16();
             FineTune = reader.ReadInt16();
             Gain = reader.ReadInt32();
-            Options = reader.ReadUInt32();
-            SampleLoops = reader.ReadUInt32();
-            _loops = new List<WaveSampleLoop>((int)SampleLoops);
-            for (uint i = 0; i < SampleLoops; i++)
+            Options = reader.ReadEnum<WaveSampleOptions>();
+            if (reader.ReadUInt32() == 1)
             {
-                _loops.Add(new WaveSampleLoop(reader));
+                Loop = new WaveSampleLoop(reader);
             }
             EatRemainingBytes(reader, endOffset);
         }
@@ -45,8 +43,8 @@ namespace Kermalis.DLS2
                 + 2 // FineTune
                 + 4 // Gain
                 + 4 // Options
-                + 4 // SampleLoops
-                + (16 * SampleLoops); // _loops
+                + 4 // DoesLoop
+                + (Loop is null ? 0u : 16u); // Loop
         }
 
         internal override void Write(EndianBinaryWriter writer)
@@ -57,10 +55,14 @@ namespace Kermalis.DLS2
             writer.Write(FineTune);
             writer.Write(Gain);
             writer.Write(Options);
-            writer.Write(SampleLoops);
-            for (int i = 0; i < SampleLoops; i++)
+            if (Loop is null)
             {
-                _loops[i].Write(writer);
+                writer.Write(0u);
+            }
+            else
+            {
+                writer.Write(1u);
+                Loop.Write(writer);
             }
         }
     }

@@ -10,7 +10,7 @@ namespace Kermalis.DLS2
         public uint AvgBytesPerSec { get; set; }
         public ushort BlockAlign { get; set; }
 
-        public WaveInfo() { }
+        internal WaveInfo() { }
         internal WaveInfo(EndianBinaryReader reader)
         {
             FormatTag = reader.ReadEnum<WaveFormat>();

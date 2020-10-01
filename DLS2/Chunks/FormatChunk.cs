@@ -11,6 +11,7 @@ namespace Kermalis.DLS2
     }
     public sealed class PCMInfo : FormatInfo
     {
+        internal PCMInfo() { }
         internal PCMInfo(EndianBinaryReader reader)
         {
             BitsPerSample = reader.ReadUInt16();
@@ -28,6 +29,10 @@ namespace Kermalis.DLS2
         public uint ChannelMask { get; set; }
         public DLSID SubFormat { get; set; }
 
+        internal ExtensibleInfo()
+        {
+            SubFormat = new DLSID();
+        }
         internal ExtensibleInfo(EndianBinaryReader reader)
         {
             BitsPerSample = reader.ReadUInt16();
@@ -54,14 +59,26 @@ namespace Kermalis.DLS2
     // Format Chunk - Page 57 of spec
     public sealed class FormatChunk : DLSChunk
     {
-        public WaveInfo WaveFormat { get; }
+        public WaveInfo WaveInfo { get; }
         public FormatInfo FormatInfo { get; }
 
+        public FormatChunk(WaveFormat format) : base("fmt ")
+        {
+            WaveInfo = new WaveInfo() { FormatTag = format };
+            if (format == WaveFormat.Extensible)
+            {
+                FormatInfo = new ExtensibleInfo();
+            }
+            else
+            {
+                FormatInfo = new PCMInfo();
+            }
+        }
         internal FormatChunk(EndianBinaryReader reader) : base("fmt ", reader)
         {
             long endOffset = GetEndOffset(reader);
-            WaveFormat = new WaveInfo(reader);
-            if (WaveFormat.FormatTag == DLS2.WaveFormat.Extensible)
+            WaveInfo = new WaveInfo(reader);
+            if (WaveInfo.FormatTag == WaveFormat.Extensible)
             {
                 FormatInfo = new ExtensibleInfo(reader);
             }
@@ -75,13 +92,13 @@ namespace Kermalis.DLS2
         internal override void UpdateSize()
         {
             Size = 14 // WaveFormat
-                + (WaveFormat.FormatTag == DLS2.WaveFormat.Extensible ? 26u : 2u); // FormatInfo
+                + (WaveInfo.FormatTag == DLS2.WaveFormat.Extensible ? 26u : 2u); // FormatInfo
         }
 
         internal override void Write(EndianBinaryWriter writer)
         {
             base.Write(writer);
-            WaveFormat.Write(writer);
+            WaveInfo.Write(writer);
             FormatInfo.Write(writer);
         }
     }
