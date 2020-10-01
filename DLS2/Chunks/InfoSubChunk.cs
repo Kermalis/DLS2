@@ -38,7 +38,7 @@ namespace Kermalis.DLS2
         internal override void UpdateSize()
         {
             Size = (uint)_text.Length + 1; // +1 for \0
-            if (Size % 2 == 1) // Align by 2 bytes
+            if (Size % 2 != 0) // Align by 2 bytes
             {
                 Size++;
             }

@@ -31,12 +31,20 @@ namespace Kermalis.DLS2
         internal override void UpdateSize()
         {
             Size = (uint)_data.Length;
+            if (Size % 2 != 0) // Align by 2 bytes
+            {
+                Size++;
+            }
         }
 
         internal override void Write(EndianBinaryWriter writer)
         {
             base.Write(writer);
             writer.Write(_data);
+            for (int i = _data.Length; i < Size; i++)
+            {
+                writer.Write((byte)0);
+            }
         }
     }
 }
