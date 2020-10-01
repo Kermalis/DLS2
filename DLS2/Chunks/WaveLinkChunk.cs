@@ -10,6 +10,7 @@ namespace Kermalis.DLS2
         public uint Channel { get; set; }
         public uint TableIndex { get; set; }
 
+        public WaveLinkChunk() : base("wlnk") { }
         internal WaveLinkChunk(EndianBinaryReader reader) : base("wlnk", reader)
         {
             if (Size != 12)

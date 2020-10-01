@@ -7,6 +7,12 @@ namespace Kermalis.DLS2
         public ushort Low { get; set; }
         public ushort High { get; set; }
 
+        public Range() { }
+        public Range(ushort low, ushort high)
+        {
+            Low = low;
+            High = high;
+        }
         internal Range(EndianBinaryReader reader)
         {
             Low = reader.ReadUInt16();

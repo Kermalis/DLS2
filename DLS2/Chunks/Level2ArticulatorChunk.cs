@@ -7,16 +7,15 @@ namespace Kermalis.DLS2
     // Level 2 Articulator Chunk - Page 49 of spec
     public sealed class Level2ArticulatorChunk : DLSChunk
     {
-        private readonly uint _byteSize;
         private readonly uint _numConnectionBlocks;
         private readonly List<ConnectionBlock> _connectionBlocks;
 
         internal Level2ArticulatorChunk(EndianBinaryReader reader) : base("art2", reader)
         {
-            _byteSize = reader.ReadUInt32();
-            if (_byteSize != 8)
+            uint byteSize = reader.ReadUInt32();
+            if (byteSize != 8)
             {
-                throw new InvalidDataException(); // TODO: Support?
+                throw new InvalidDataException();
             }
             _numConnectionBlocks = reader.ReadUInt32();
             _connectionBlocks = new List<ConnectionBlock>((int)_numConnectionBlocks);
@@ -36,7 +35,7 @@ namespace Kermalis.DLS2
         internal override void Write(EndianBinaryWriter writer)
         {
             base.Write(writer);
-            writer.Write(_byteSize);
+            writer.Write(8u);
             writer.Write(_numConnectionBlocks);
             for (int i = 0; i < _numConnectionBlocks; i++)
             {

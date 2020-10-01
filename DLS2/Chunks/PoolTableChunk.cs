@@ -7,16 +7,19 @@ namespace Kermalis.DLS2
     // Pool Table Chunk - Page 54 of spec
     public sealed class PoolTableChunk : DLSChunk
     {
-        private readonly uint _byteSize;
         private readonly uint _numCues;
         private readonly List<uint> _poolCues;
 
+        internal PoolTableChunk() : base("ptbl")
+        {
+            _poolCues = new List<uint>();
+        }
         internal PoolTableChunk(EndianBinaryReader reader) : base("ptbl", reader)
         {
-            _byteSize = reader.ReadUInt32();
-            if (_byteSize != 8)
+            uint byteSize = reader.ReadUInt32();
+            if (byteSize != 8)
             {
-                throw new InvalidDataException(); // TODO: Support?
+                throw new InvalidDataException();
             }
             _numCues = reader.ReadUInt32();
             _poolCues = new List<uint>((int)_numCues);
@@ -36,7 +39,7 @@ namespace Kermalis.DLS2
         internal override void Write(EndianBinaryWriter writer)
         {
             base.Write(writer);
-            writer.Write(_byteSize);
+            writer.Write(8u);
             writer.Write(_numCues);
             for (int i = 0; i < _numCues; i++)
             {

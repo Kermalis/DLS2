@@ -6,13 +6,38 @@ using System.IO;
 
 namespace Kermalis.DLS2
 {
-    public sealed class DLS : IReadOnlyList<DLSChunk>
+    public sealed class DLS : IList<DLSChunk>, IReadOnlyList<DLSChunk>
     {
-        private uint _size;
         private readonly List<DLSChunk> _chunks;
 
         public int Count => _chunks.Count;
-        public DLSChunk this[int index] => _chunks[index];
+        public bool IsReadOnly => false;
+        public DLSChunk this[int index]
+        {
+            get => _chunks[index];
+            set
+            {
+                if (value is null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                _chunks[index] = value;
+            }
+        }
+
+        public CollectionHeaderChunk CollectionHeader => GetChunk<CollectionHeaderChunk>();
+        public ListChunk InstrumentList => GetListChunk("lins");
+        public PoolTableChunk PoolTable => GetChunk<PoolTableChunk>();
+        public ListChunk WaveInfoList => GetListChunk("wvpl");
+
+        private T GetChunk<T>() where T : DLSChunk
+        {
+            return (T)_chunks.Find(c => c is T);
+        }
+        private ListChunk GetListChunk(string str)
+        {
+            return (ListChunk)_chunks.Find(c => c is ListChunk lc && lc.Identifier == str);
+        }
 
 #if DEBUG
         public static void Main()
@@ -23,6 +48,17 @@ namespace Kermalis.DLS2
         }
 #endif
 
+        /// <summary>For creating.</summary>
+        public DLS()
+        {
+            _chunks = new List<DLSChunk>()
+            {
+                new CollectionHeaderChunk(),
+                new ListChunk("lins"),
+                new PoolTableChunk(),
+                new ListChunk("wvpl"),
+            };
+        }
         public DLS(string path)
         {
             using (var reader = new EndianBinaryReader(File.Open(path, FileMode.Open)))
@@ -32,13 +68,13 @@ namespace Kermalis.DLS2
                 {
                     throw new InvalidDataException("RIFF header was not found at the start of the file.");
                 }
-                _size = reader.ReadUInt32();
+                uint size = reader.ReadUInt32();
                 str = reader.ReadString(4, false);
                 if (str != "DLS ")
                 {
                     throw new InvalidDataException("DLS header was not found at the expected offset.");
                 }
-                _chunks = GetAllChunks(reader, reader.BaseStream.Position + (_size - 4)); // Subtract 4 for the "DLS "
+                _chunks = GetAllChunks(reader, reader.BaseStream.Position + (size - 4)); // Subtract 4 for the "DLS "
             }
 #if DEBUG
             Save(@"C:\Users\Kermalis\Documents\Emulation\GBA\Games\M\test2.dls");
@@ -49,10 +85,8 @@ namespace Kermalis.DLS2
         {
             using (var writer = new EndianBinaryWriter(File.Open(path, FileMode.Create)))
             {
-                UpdateSize();
-
                 writer.Write("RIFF", 4);
-                writer.Write(_size);
+                writer.Write(UpdateSize());
                 writer.Write("DLS ", 4);
                 foreach (DLSChunk c in _chunks)
                 {
@@ -102,14 +136,15 @@ namespace Kermalis.DLS2
             return str;
         }
 
-        internal void UpdateSize()
+        private uint UpdateSize()
         {
-            _size = 4;
+            uint size = 4;
             foreach (DLSChunk c in _chunks)
             {
                 c.UpdateSize();
-                _size += c.Size + 8;
+                size += c.Size + 8;
             }
+            return size;
         }
 
         internal static List<DLSChunk> GetAllChunks(EndianBinaryReader reader, long endOffset)
@@ -160,6 +195,47 @@ namespace Kermalis.DLS2
                 case "ITCH": return new InfoSubChunk(str, reader);
                 default: return new UnsupportedChunk(str, reader);
             }
+        }
+
+        public void Add(DLSChunk chunk)
+        {
+            if (chunk is null)
+            {
+                throw new ArgumentNullException(nameof(chunk));
+            }
+            _chunks.Add(chunk);
+        }
+        public void Clear()
+        {
+            _chunks.Clear();
+        }
+        public bool Contains(DLSChunk chunk)
+        {
+            return _chunks.Contains(chunk);
+        }
+        public void CopyTo(DLSChunk[] array, int arrayIndex)
+        {
+            _chunks.CopyTo(array, arrayIndex);
+        }
+        public int IndexOf(DLSChunk chunk)
+        {
+            return _chunks.IndexOf(chunk);
+        }
+        public void Insert(int index, DLSChunk chunk)
+        {
+            if (chunk is null)
+            {
+                throw new ArgumentNullException(nameof(chunk));
+            }
+            _chunks.Insert(index, chunk);
+        }
+        public bool Remove(DLSChunk chunk)
+        {
+            return _chunks.Remove(chunk);
+        }
+        public void RemoveAt(int index)
+        {
+            _chunks.RemoveAt(index);
         }
 
         public IEnumerator<DLSChunk> GetEnumerator()

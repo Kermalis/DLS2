@@ -6,12 +6,17 @@ namespace Kermalis.DLS2
     // Region Header Chunk - Page 45 of spec
     public sealed class RegionHeaderChunk : DLSChunk
     {
-        public Range KeyRange { get; }
-        public Range VelocityRange { get; }
+        public Range KeyRange { get; set; }
+        public Range VelocityRange { get; set; }
         public ushort Options { get; set; }
         public ushort KeyGroup { get; set; }
         public ushort Layer { get; set; }
 
+        public RegionHeaderChunk() : base("rgnh")
+        {
+            KeyRange = new Range(0, 127);
+            VelocityRange = new Range(0, 127);
+        }
         internal RegionHeaderChunk(EndianBinaryReader reader) : base("rgnh", reader)
         {
             if (Size != 12 && Size != 14)

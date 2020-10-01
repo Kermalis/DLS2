@@ -6,6 +6,10 @@ namespace Kermalis.DLS2
     {
         public string Text { get; set; } // TODO: Verify setter, update size
 
+        public InfoSubChunk(string name, string text) : base(name)
+        {
+            Text = text;
+        }
         internal InfoSubChunk(string name, EndianBinaryReader reader) : base(name, reader)
         {
             Text = reader.ReadString((int)Size, true);

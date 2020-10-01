@@ -10,6 +10,7 @@ namespace Kermalis.DLS2
         public ushort Transform { get; set; }
         public int Scale { get; set; }
 
+        public ConnectionBlock() { }
         internal ConnectionBlock(EndianBinaryReader reader)
         {
             Source = reader.ReadUInt16();

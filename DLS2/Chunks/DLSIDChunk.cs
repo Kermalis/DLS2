@@ -1,13 +1,30 @@
 ﻿using Kermalis.EndianBinaryIO;
+using System;
 using System.IO;
 
 namespace Kermalis.DLS2
 {
     // DLSID Chunk - Page 40 of spec
-    internal sealed class DLSIDChunk : DLSChunk
+    public sealed class DLSIDChunk : DLSChunk
     {
-        public DLSID DLSID { get; }
+        private DLSID _dlsid;
+        public DLSID DLSID
+        {
+            get => _dlsid;
+            set
+            {
+                if (value is null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+                _dlsid = value;
+            }
+        }
 
+        public DLSIDChunk(DLSID id) : base("dlid")
+        {
+            DLSID = id;
+        }
         public DLSIDChunk(EndianBinaryReader reader) : base("dlid", reader)
         {
             if (Size != 16)
