@@ -1,14 +1,18 @@
 ﻿using Kermalis.EndianBinaryIO;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Kermalis.DLS2
 {
     // LIST Chunk - Page 40 of spec
-    internal sealed class ListChunk : DLSChunk
+    public sealed class ListChunk : DLSChunk, IReadOnlyList<DLSChunk>
     {
         /// <summary>Length 4</summary>
         public string Identifier { get; set; }
         private readonly List<DLSChunk> _children;
+
+        public int Count => _children.Count;
+        public DLSChunk this[int index] => _children[index];
 
         internal ListChunk(EndianBinaryReader reader) : base("LIST", reader)
         {
@@ -35,6 +39,15 @@ namespace Kermalis.DLS2
             {
                 c.Write(writer);
             }
+        }
+
+        public IEnumerator<DLSChunk> GetEnumerator()
+        {
+            return _children.GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _children.GetEnumerator();
         }
     }
 }

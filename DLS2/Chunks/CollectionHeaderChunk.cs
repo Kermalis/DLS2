@@ -12,7 +12,7 @@ namespace Kermalis.DLS2
         {
             if (Size != 4)
             {
-                throw new InvalidDataException("Invalid colh size.");
+                throw new InvalidDataException();
             }
             NumInstruments = reader.ReadUInt32();
         }

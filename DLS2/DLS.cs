@@ -1,13 +1,18 @@
 ﻿using Kermalis.EndianBinaryIO;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Kermalis.DLS2
 {
-    public class DLS
+    public sealed class DLS : IReadOnlyList<DLSChunk>
     {
         private uint _size;
         private readonly List<DLSChunk> _chunks;
+
+        public int Count => _chunks.Count;
+        public DLSChunk this[int index] => _chunks[index];
 
 #if DEBUG
         public static void Main()
@@ -56,6 +61,43 @@ namespace Kermalis.DLS2
             }
         }
 
+        public string GetHierarchy()
+        {
+            string str = string.Empty;
+            int tabLevel = 0;
+            void ApplyTabLevel()
+            {
+                for (int t = 0; t < tabLevel; t++)
+                {
+                    str += '\t';
+                }
+            }
+            void Recursion(IReadOnlyList<DLSChunk> parent, string listName)
+            {
+                ApplyTabLevel();
+                str += $"{listName} ({parent.Count})";
+                tabLevel++;
+                foreach (DLSChunk c in parent)
+                {
+                    str += Environment.NewLine;
+                    if (c is ListChunk lc)
+                    {
+                        Recursion(lc, $"{lc.ChunkName} '{lc.Identifier}'");
+                    }
+                    else
+                    {
+                        ApplyTabLevel();
+                        str += $"<{c.ChunkName}>";
+                    }
+                }
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
+                tabLevel--;
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
+            }
+            Recursion(this, "RIFF 'DLS '");
+            return str;
+        }
+
         internal void UpdateSize()
         {
             _size = 4;
@@ -96,6 +138,15 @@ namespace Kermalis.DLS2
                 case "wsmp": return new WaveSampleChunk(reader);
                 default: return new UnsupportedChunk(str, reader);
             }
+        }
+
+        public IEnumerator<DLSChunk> GetEnumerator()
+        {
+            return _chunks.GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _chunks.GetEnumerator();
         }
     }
 }
