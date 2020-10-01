@@ -88,6 +88,10 @@ namespace Kermalis.DLS2
                     {
                         ApplyTabLevel();
                         str += $"<{c.ChunkName}>";
+                        if (c is InfoSubChunk ic)
+                        {
+                            str += $" [\"{ic.Text}\"]";
+                        }
                     }
                 }
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
@@ -136,6 +140,24 @@ namespace Kermalis.DLS2
                 case "rgnh": return new RegionHeaderChunk(reader);
                 case "wlnk": return new WaveLinkChunk(reader);
                 case "wsmp": return new WaveSampleChunk(reader);
+                // InfoSubChunks
+                case "IARL":
+                case "IART":
+                case "ICMS":
+                case "ICMD":
+                case "ICOP":
+                case "ICRD":
+                case "IENG":
+                case "IGNR":
+                case "IKEY":
+                case "IMED":
+                case "INAM":
+                case "IPRD":
+                case "ISBJ":
+                case "ISFT":
+                case "ISRC":
+                case "ISRF":
+                case "ITCH": return new InfoSubChunk(str, reader);
                 default: return new UnsupportedChunk(str, reader);
             }
         }
