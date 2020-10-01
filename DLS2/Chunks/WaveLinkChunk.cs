@@ -9,7 +9,10 @@ namespace Kermalis.DLS2
         public WaveLinkChannels Channels { get; set; }
         public uint TableIndex { get; set; }
 
-        public WaveLinkChunk() : base("wlnk") { }
+        public WaveLinkChunk() : base("wlnk")
+        {
+            Channels = WaveLinkChannels.Left;
+        }
         internal WaveLinkChunk(EndianBinaryReader reader) : base("wlnk", reader)
         {
             long endOffset = GetEndOffset(reader);
