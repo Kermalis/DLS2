@@ -44,6 +44,7 @@ namespace Kermalis.DLS2
         public static void Main()
         {
             new DLS(@"C:\Users\Kermalis\Documents\Emulation\GBA\Games\M\test.dls");
+            //new DLS(@"C:\Users\Kermalis\Documents\Emulation\GBA\Games\M\test2.dls");
             //new DLS(@"C:\Users\Kermalis\Music\Samples, Presets, Soundfonts, VSTs, etc\Soundfonts\Arachno SoundFont - Version 1.0.dls");
             //new DLS(@"C:\Users\Kermalis\Music\Samples, Presets, Soundfonts, VSTs, etc\Soundfonts\Musyng Kite.dls");
         }
@@ -77,9 +78,6 @@ namespace Kermalis.DLS2
                 }
                 _chunks = DLSChunk.GetAllChunks(reader, reader.BaseStream.Position + (size - 4)); // Subtract 4 for the "DLS "
             }
-#if DEBUG
-            Save(@"C:\Users\Kermalis\Documents\Emulation\GBA\Games\M\test2.dls");
-#endif
         }
 
         public void UpdateCollectionHeader()
