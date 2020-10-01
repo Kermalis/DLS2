@@ -1,5 +1,6 @@
 ﻿using Kermalis.EndianBinaryIO;
 using System;
+using System.Linq;
 
 namespace Kermalis.DLS2
 {
@@ -74,6 +75,22 @@ namespace Kermalis.DLS2
             writer.Write(Data4);
         }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, this))
+            {
+                return true;
+            }
+            if (obj is DLSID id)
+            {
+                return id.Data1 == Data1 && id.Data2 == Data2 && id.Data3 == Data3 && id.Data4.SequenceEqual(Data4);
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Data1, Data2, Data3, Data4);
+        }
         public override string ToString()
         {
             string str = Data1.ToString("X8") + '-' + Data2.ToString("X4") + '-' + Data3.ToString("X4") + '-';
