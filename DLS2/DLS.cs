@@ -29,7 +29,7 @@ namespace Kermalis.DLS2
         public CollectionHeaderChunk CollectionHeader => GetChunk<CollectionHeaderChunk>();
         public ListChunk InstrumentList => GetListChunk("lins");
         public PoolTableChunk PoolTable => GetChunk<PoolTableChunk>();
-        public ListChunk WaveInfoList => GetListChunk("wvpl");
+        public ListChunk WavePool => GetListChunk("wvpl");
 
         private T GetChunk<T>() where T : DLSChunk
         {
@@ -82,8 +82,25 @@ namespace Kermalis.DLS2
 #endif
         }
 
+        /// <summary>Updates the pointers in the <see cref="PoolTable"/>. Should be called after modifying <see cref="WavePool"/>.</summary>
+        public void UpdatePoolTable()
+        {
+            ListChunk wvpl = WavePool;
+            var newCues = new List<uint>(wvpl.Count);
+            uint cur = 0;
+            for (int i = 0; i < wvpl.Count; i++)
+            {
+                newCues.Add(cur);
+                DLSChunk c = wvpl[i];
+                c.UpdateSize();
+                cur += c.Size + 8;
+            }
+            PoolTable.UpdateCues(newCues);
+        }
         public void Save(string path)
         {
+            UpdatePoolTable();
+
             using (var writer = new EndianBinaryWriter(File.Open(path, FileMode.Create)))
             {
                 writer.Write("RIFF", 4);

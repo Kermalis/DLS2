@@ -1,14 +1,18 @@
 ﻿using Kermalis.EndianBinaryIO;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Kermalis.DLS2
 {
     // Pool Table Chunk - Page 54 of spec
-    public sealed class PoolTableChunk : DLSChunk
+    public sealed class PoolTableChunk : DLSChunk, IReadOnlyList<uint>
     {
-        private readonly uint _numCues;
-        private readonly List<uint> _poolCues;
+        private uint _numCues;
+        private List<uint> _poolCues;
+
+        public uint this[int index] => _poolCues[index];
+        public int Count => (int)_numCues;
 
         internal PoolTableChunk() : base("ptbl")
         {
@@ -31,6 +35,12 @@ namespace Kermalis.DLS2
             EatRemainingBytes(reader, endOffset);
         }
 
+        internal void UpdateCues(List<uint> newCues)
+        {
+            _numCues = (uint)newCues.Count;
+            _poolCues = newCues;
+        }
+
         internal override void UpdateSize()
         {
             Size = 4 // byteSize
@@ -47,6 +57,15 @@ namespace Kermalis.DLS2
             {
                 writer.Write(_poolCues[i]);
             }
+        }
+
+        public IEnumerator<uint> GetEnumerator()
+        {
+            return _poolCues.GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _poolCues.GetEnumerator();
         }
     }
 }
