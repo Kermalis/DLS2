@@ -65,6 +65,7 @@ namespace Kermalis.DLS2
                 case "art2": return new Level2ArticulatorChunk(reader);
                 case "colh": return new CollectionHeaderChunk(reader);
                 case "dlid": return new DLSIDChunk(reader);
+                case "fmt ": return new FormatChunk(reader);
                 case "insh": return new InstrumentHeaderChunk(reader);
                 case "LIST": return new ListChunk(reader);
                 case "ptbl": return new PoolTableChunk(reader);
