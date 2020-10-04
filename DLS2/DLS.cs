@@ -66,19 +66,28 @@ namespace Kermalis.DLS2
         {
             using (var reader = new EndianBinaryReader(File.Open(path, FileMode.Open)))
             {
-                string str = reader.ReadString(4, false);
-                if (str != "RIFF")
-                {
-                    throw new InvalidDataException("RIFF header was not found at the start of the file.");
-                }
-                uint size = reader.ReadUInt32();
-                str = reader.ReadString(4, false);
-                if (str != "DLS ")
-                {
-                    throw new InvalidDataException("DLS header was not found at the expected offset.");
-                }
-                _chunks = DLSChunk.GetAllChunks(reader, reader.BaseStream.Position + (size - 4)); // Subtract 4 for the "DLS "
+                _chunks = Init(reader);
             }
+        }
+        public DLS(Stream stream)
+        {
+            _chunks = Init(new EndianBinaryReader(stream));
+        }
+        private List<DLSChunk> Init(EndianBinaryReader reader)
+        {
+            string str = reader.ReadString(4, false);
+            if (str != "RIFF")
+            {
+                throw new InvalidDataException("RIFF header was not found at the start of the file.");
+            }
+            uint size = reader.ReadUInt32();
+            long endOffset = reader.BaseStream.Position + size;
+            str = reader.ReadString(4, false);
+            if (str != "DLS ")
+            {
+                throw new InvalidDataException("DLS header was not found at the expected offset.");
+            }
+            return DLSChunk.GetAllChunks(reader, endOffset);
         }
 
         public void UpdateCollectionHeader()
