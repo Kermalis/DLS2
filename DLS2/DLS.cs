@@ -43,10 +43,11 @@ namespace Kermalis.DLS2
 #if DEBUG
         public static void Main()
         {
-            new DLS(@"C:\Users\Kermalis\Documents\Emulation\GBA\Games\M\test.dls");
+            //new DLS(@"C:\Users\Kermalis\Documents\Emulation\GBA\Games\M\test.dls");
             //new DLS(@"C:\Users\Kermalis\Documents\Emulation\GBA\Games\M\test2.dls");
             //new DLS(@"C:\Users\Kermalis\Music\Samples, Presets, Soundfonts, VSTs, etc\Soundfonts\Arachno SoundFont - Version 1.0.dls");
             //new DLS(@"C:\Users\Kermalis\Music\Samples, Presets, Soundfonts, VSTs, etc\Soundfonts\Musyng Kite.dls");
+            new DLS(@"C:\Users\Kermalis\Music\Samples, Presets, Soundfonts, VSTs, etc\Soundfonts\RSE Corrected Soundfont Revision 17.dls");
         }
 #endif
 
@@ -146,6 +147,10 @@ namespace Kermalis.DLS2
                         if (c is InfoSubChunk ic)
                         {
                             str.Append($" [\"{ic.Text}\"]");
+                        }
+                        else if (c is RawDataChunk dc)
+                        {
+                            str.Append($" [{dc.Data.Length} bytes]");
                         }
                     }
                 }
