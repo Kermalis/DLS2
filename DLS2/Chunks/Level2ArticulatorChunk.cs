@@ -30,7 +30,7 @@ namespace Kermalis.DLS2
         {
             _connectionBlocks = new List<Level2ArticulatorConnectionBlock>();
         }
-        internal Level2ArticulatorChunk(EndianBinaryReader reader) : base("art1", reader)
+        internal Level2ArticulatorChunk(EndianBinaryReader reader) : base("art2", reader)
         {
             long endOffset = GetEndOffset(reader);
             uint byteSize = reader.ReadUInt32();
