@@ -1,14 +1,14 @@
 ﻿namespace Kermalis.DLS2
 {
-    // TODO:
+	// TODO:
 
-    /*public sealed class VersionChunk : DLSChunk
-    {
+	/*public sealed class VersionChunk : DLSChunk
+	{
 
 
-        internal VersionChunk(EndianBinaryReader reader) : base("vers", reader)
-        {
+		internal VersionChunk(EndianBinaryReader reader) : base("vers", reader)
+		{
 
-        }
-    }*/
+		}
+	}*/
 }
