@@ -8,8 +8,8 @@ namespace Kermalis.DLS2
 	{
 		/// <summary>Length 4</summary>
 		public string ChunkName { get; }
-		/// <summary>Size in bytes</summary>
-		protected internal uint Size { get; protected set; }
+		/// <summary>Size in bytes. Only accurate after <see cref="UpdateSize"/>.</summary>
+		public uint Size { get; protected set; }
 
 		protected DLSChunk(string chunkName)
 		{
