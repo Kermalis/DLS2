@@ -5,10 +5,15 @@ namespace Kermalis.DLS2
 	// Collection Header Chunk - Page 40 of spec
 	public sealed class CollectionHeaderChunk : DLSChunk
 	{
+		internal const string EXPECTED_NAME = "colh";
+
 		public uint NumInstruments { get; internal set; }
 
-		internal CollectionHeaderChunk() : base("colh") { }
-		public CollectionHeaderChunk(EndianBinaryReader reader) : base("colh", reader)
+		internal CollectionHeaderChunk() : base(EXPECTED_NAME)
+		{
+			UpdateSize();
+		}
+		public CollectionHeaderChunk(EndianBinaryReader reader) : base(EXPECTED_NAME, reader)
 		{
 			long endOffset = GetEndOffset(reader);
 			NumInstruments = reader.ReadUInt32();

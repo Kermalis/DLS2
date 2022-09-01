@@ -4,10 +4,15 @@ namespace Kermalis.DLS2
 {
 	public sealed class Range
 	{
+		internal const int SIZE = 4;
+
 		public ushort Low { get; set; }
 		public ushort High { get; set; }
 
-		public Range() { }
+		public Range()
+		{
+			//
+		}
 		public Range(ushort low, ushort high)
 		{
 			Low = low;

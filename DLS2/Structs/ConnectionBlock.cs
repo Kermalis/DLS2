@@ -11,7 +11,10 @@ namespace Kermalis.DLS2
 		public Level1ArticulatorTransform Transform { get; set; }
 		public int Scale { get; set; }
 
-		public Level1ArticulatorConnectionBlock() { }
+		public Level1ArticulatorConnectionBlock()
+		{
+			//
+		}
 		internal Level1ArticulatorConnectionBlock(EndianBinaryReader reader)
 		{
 			Source = reader.ReadEnum<Level1ArticulatorSource>();
@@ -141,7 +144,10 @@ namespace Kermalis.DLS2
 			}
 		}
 
-		public Level2ArticulatorConnectionBlock() { }
+		public Level2ArticulatorConnectionBlock()
+		{
+			//
+		}
 		internal Level2ArticulatorConnectionBlock(EndianBinaryReader reader)
 		{
 			Source = reader.ReadEnum<Level2ArticulatorSource>();

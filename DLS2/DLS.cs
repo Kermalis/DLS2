@@ -19,19 +19,10 @@ namespace Kermalis.DLS2
 			set => _chunks[index] = value;
 		}
 
-		public CollectionHeaderChunk CollectionHeader => GetChunk<CollectionHeaderChunk>();
-		public ListChunk InstrumentList => GetListChunk("lins");
-		public PoolTableChunk PoolTable => GetChunk<PoolTableChunk>();
-		public ListChunk WavePool => GetListChunk("wvpl");
-
-		private T GetChunk<T>() where T : DLSChunk
-		{
-			return (T)_chunks.Find(c => c is T)!;
-		}
-		private ListChunk GetListChunk(string str)
-		{
-			return (ListChunk)_chunks.Find(c => c is ListChunk lc && lc.Identifier == str)!;
-		}
+		public CollectionHeaderChunk CollectionHeader { get; }
+		public ListChunk InstrumentList { get; }
+		public PoolTableChunk PoolTable { get; }
+		public ListChunk WavePool { get; }
 
 #if DEBUG
 		public static void Main()
@@ -50,40 +41,81 @@ namespace Kermalis.DLS2
 		/// <summary>For creating.</summary>
 		public DLS()
 		{
-			_chunks = new List<DLSChunk>()
+			CollectionHeader = new CollectionHeaderChunk();
+			InstrumentList = new ListChunk("lins");
+			PoolTable = new PoolTableChunk();
+			WavePool = new ListChunk("wvpl");
+			_chunks = new List<DLSChunk>(4)
 			{
-				new CollectionHeaderChunk(),
-				new ListChunk("lins"),
-				new PoolTableChunk(),
-				new ListChunk("wvpl"),
+				CollectionHeader,
+				InstrumentList,
+				PoolTable,
+				WavePool,
 			};
 		}
 		public DLS(string path)
 		{
 			using (FileStream stream = File.Open(path, FileMode.Open))
 			{
-				_chunks = Init(new EndianBinaryReader(stream, ascii: true));
+				_chunks = Init(new EndianBinaryReader(stream, ascii: true),
+					out CollectionHeaderChunk colh, out ListChunk lins, out PoolTableChunk ptbl, out ListChunk wvpl);
+				CollectionHeader = colh;
+				InstrumentList = lins;
+				PoolTable = ptbl;
+				WavePool = wvpl;
 			}
 		}
 		public DLS(Stream stream)
 		{
-			_chunks = Init(new EndianBinaryReader(stream, ascii: true));
+			_chunks = Init(new EndianBinaryReader(stream, ascii: true),
+				out CollectionHeaderChunk colh, out ListChunk lins, out PoolTableChunk ptbl, out ListChunk wvpl);
+			CollectionHeader = colh;
+			InstrumentList = lins;
+			PoolTable = ptbl;
+			WavePool = wvpl;
 		}
-		private static List<DLSChunk> Init(EndianBinaryReader reader)
+		private static List<DLSChunk> Init(EndianBinaryReader reader, out CollectionHeaderChunk colh, out ListChunk lins, out PoolTableChunk ptbl, out ListChunk wvpl)
 		{
-			string str = reader.ReadString_Count(4);
-			if (str != "RIFF")
+			string chunkName = reader.ReadString_Count(4);
+			if (chunkName != "RIFF")
 			{
 				throw new InvalidDataException("RIFF header was not found at the start of the file.");
 			}
+
 			uint size = reader.ReadUInt32();
 			long endOffset = reader.Stream.Position + size;
-			str = reader.ReadString_Count(4);
-			if (str != "DLS ")
+			chunkName = reader.ReadString_Count(4);
+			if (chunkName != "DLS ")
 			{
 				throw new InvalidDataException("DLS header was not found at the expected offset.");
 			}
-			return DLSChunk.GetAllChunks(reader, endOffset);
+
+			List<DLSChunk> chunks = DLSChunk.GetAllChunks(reader, endOffset);
+			if (chunks.Count >= 4)
+			{
+				colh = null!;
+				lins = null!;
+				ptbl = null!;
+				wvpl = null!;
+
+				foreach (DLSChunk ch in chunks)
+				{
+					switch (ch)
+					{
+						case CollectionHeaderChunk c: colh = c; break;
+						case ListChunk c when c.Identifier == "lins": lins = c; break;
+						case PoolTableChunk c: ptbl = c; break;
+						case ListChunk c when c.Identifier == "wvpl": wvpl = c; break;
+					}
+				}
+
+				if (colh is not null && lins is not null && ptbl is not null && wvpl is not null)
+				{
+					return chunks;
+				}
+			}
+
+			throw new InvalidDataException("Could not find the 4 required chunks: colh, lins, ptbl, wvpl");
 		}
 
 		public void UpdateCollectionHeader()
@@ -168,7 +200,7 @@ namespace Kermalis.DLS2
 			return str.ToString();
 		}
 
-		private uint UpdateSize()
+		public uint UpdateSize()
 		{
 			uint size = 4;
 			foreach (DLSChunk c in _chunks)
@@ -181,10 +213,6 @@ namespace Kermalis.DLS2
 
 		public void Add(DLSChunk chunk)
 		{
-			if (chunk is null)
-			{
-				throw new ArgumentNullException(nameof(chunk));
-			}
 			_chunks.Add(chunk);
 		}
 		public void Clear()
@@ -205,10 +233,6 @@ namespace Kermalis.DLS2
 		}
 		public void Insert(int index, DLSChunk chunk)
 		{
-			if (chunk is null)
-			{
-				throw new ArgumentNullException(nameof(chunk));
-			}
 			_chunks.Insert(index, chunk);
 		}
 		public bool Remove(DLSChunk chunk)

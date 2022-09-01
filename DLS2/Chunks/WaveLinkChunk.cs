@@ -4,16 +4,20 @@ namespace Kermalis.DLS2
 {
 	public sealed class WaveLinkChunk : DLSChunk
 	{
+		internal const string EXPECTED_NAME = "wlnk";
+
 		public WaveLinkOptions Options { get; set; }
 		public ushort PhaseGroup { get; set; }
 		public WaveLinkChannels Channels { get; set; }
 		public uint TableIndex { get; set; }
 
-		public WaveLinkChunk() : base("wlnk")
+		public WaveLinkChunk() : base(EXPECTED_NAME)
 		{
 			Channels = WaveLinkChannels.Left;
+
+			UpdateSize();
 		}
-		internal WaveLinkChunk(EndianBinaryReader reader) : base("wlnk", reader)
+		internal WaveLinkChunk(EndianBinaryReader reader) : base(EXPECTED_NAME, reader)
 		{
 			long endOffset = GetEndOffset(reader);
 			Options = reader.ReadEnum<WaveLinkOptions>();

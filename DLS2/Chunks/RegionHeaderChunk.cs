@@ -5,18 +5,22 @@ namespace Kermalis.DLS2
 	// Region Header Chunk - Page 45 of spec
 	public sealed class RegionHeaderChunk : DLSChunk
 	{
+		internal const string EXPECTED_NAME = "rgnh";
+
 		public Range KeyRange { get; set; }
 		public Range VelocityRange { get; set; }
 		public ushort Options { get; set; }
 		public ushort KeyGroup { get; set; }
 		public ushort Layer { get; set; }
 
-		public RegionHeaderChunk() : base("rgnh")
+		public RegionHeaderChunk() : base(EXPECTED_NAME)
 		{
 			KeyRange = new Range(0, 127);
 			VelocityRange = new Range(0, 127);
+
+			UpdateSize();
 		}
-		internal RegionHeaderChunk(EndianBinaryReader reader) : base("rgnh", reader)
+		internal RegionHeaderChunk(EndianBinaryReader reader) : base(EXPECTED_NAME, reader)
 		{
 			long endOffset = GetEndOffset(reader);
 			KeyRange = new Range(reader);
@@ -32,8 +36,8 @@ namespace Kermalis.DLS2
 
 		internal override void UpdateSize()
 		{
-			Size = 4 // KeyRange
-				+ 4 // VelocityRange
+			Size = Range.SIZE // KeyRange
+				+ Range.SIZE // VelocityRange
 				+ 2 // Options
 				+ 2 // KeyGroup
 				+ 2; // Layer

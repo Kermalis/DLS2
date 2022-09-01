@@ -6,6 +6,8 @@ namespace Kermalis.DLS2
 {
 	public sealed class DLSID
 	{
+		internal const int SIZE = 16;
+
 		public uint Data1 { get; set; }
 		public ushort Data2 { get; set; }
 		public ushort Data3 { get; set; }
@@ -46,9 +48,9 @@ namespace Kermalis.DLS2
 		}
 		public DLSID(byte[] data)
 		{
-			if (data.Length != 16)
+			if (data.Length != SIZE)
 			{
-				throw new ArgumentOutOfRangeException(nameof(data), data, "data length must be 16.");
+				throw new ArgumentOutOfRangeException(nameof(data), data, $"data length must be {SIZE}.");
 			}
 			Data1 = EndianBinaryPrimitives.ReadUInt32(data.AsSpan(0, 4), Endianness.LittleEndian);
 			Data2 = EndianBinaryPrimitives.ReadUInt16(data.AsSpan(4, 2), Endianness.LittleEndian);

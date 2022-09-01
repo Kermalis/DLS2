@@ -5,14 +5,18 @@ namespace Kermalis.DLS2
 	// Instrument Header Chunk - Page 45 of spec
 	public sealed class InstrumentHeaderChunk : DLSChunk
 	{
+		internal const string EXPECTED_NAME = "insh";
+
 		public uint NumRegions { get; set; }
 		public MIDILocale Locale { get; set; }
 
-		public InstrumentHeaderChunk(MIDILocale locale) : base("insh")
+		public InstrumentHeaderChunk(MIDILocale locale) : base(EXPECTED_NAME)
 		{
 			Locale = locale;
+
+			UpdateSize();
 		}
-		internal InstrumentHeaderChunk(EndianBinaryReader reader) : base("insh", reader)
+		internal InstrumentHeaderChunk(EndianBinaryReader reader) : base(EXPECTED_NAME, reader)
 		{
 			long endOffset = GetEndOffset(reader);
 			NumRegions = reader.ReadUInt32();
@@ -23,7 +27,7 @@ namespace Kermalis.DLS2
 		internal override void UpdateSize()
 		{
 			Size = 4 // NumRegions
-				+ 8; // Locale
+				+ MIDILocale.SIZE; // Locale
 		}
 
 		internal override void Write(EndianBinaryWriter writer)

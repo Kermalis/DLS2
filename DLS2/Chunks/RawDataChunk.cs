@@ -9,6 +9,8 @@ namespace Kermalis.DLS2
 		protected RawDataChunk(string name, byte[] data) : base(name)
 		{
 			Data = data;
+
+			UpdateSize();
 		}
 		protected RawDataChunk(string name, EndianBinaryReader reader) : base(name, reader)
 		{

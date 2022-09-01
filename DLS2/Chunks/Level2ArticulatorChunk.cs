@@ -8,6 +8,8 @@ namespace Kermalis.DLS2
 	// Level 2 Articulator Chunk - Page 49 of spec
 	public sealed class Level2ArticulatorChunk : DLSChunk, IList<Level2ArticulatorConnectionBlock>, IReadOnlyList<Level2ArticulatorConnectionBlock>
 	{
+		internal const string EXPECTED_NAME = "art2";
+
 		private readonly List<Level2ArticulatorConnectionBlock> _connectionBlocks;
 
 		public Level2ArticulatorConnectionBlock this[int index]
@@ -18,17 +20,19 @@ namespace Kermalis.DLS2
 		public int Count => _connectionBlocks.Count;
 		public bool IsReadOnly => false;
 
-		public Level2ArticulatorChunk() : base("art2")
+		public Level2ArticulatorChunk() : base(EXPECTED_NAME)
 		{
 			_connectionBlocks = new List<Level2ArticulatorConnectionBlock>();
+
+			UpdateSize();
 		}
-		internal Level2ArticulatorChunk(EndianBinaryReader reader) : base("art2", reader)
+		internal Level2ArticulatorChunk(EndianBinaryReader reader) : base(EXPECTED_NAME, reader)
 		{
 			long endOffset = GetEndOffset(reader);
 			uint byteSize = reader.ReadUInt32();
 			if (byteSize != 8)
 			{
-				throw new InvalidDataException();
+				throw new InvalidDataException($"Level2ArticulatorChunk byteSize was not 8 bytes ({byteSize})");
 			}
 
 			uint numConnectionBlocks = reader.ReadUInt32();

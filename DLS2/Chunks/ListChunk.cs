@@ -7,6 +7,8 @@ namespace Kermalis.DLS2
 	// LIST Chunk - Page 40 of spec
 	public sealed class ListChunk : DLSChunk, IList<DLSChunk>, IReadOnlyList<DLSChunk>
 	{
+		internal const string EXPECTED_NAME = "LIST";
+
 		/// <summary>Length 4</summary>
 		public string Identifier { get; set; }
 		private readonly List<DLSChunk> _children;
@@ -19,12 +21,14 @@ namespace Kermalis.DLS2
 			set => _children[index] = value;
 		}
 
-		public ListChunk(string identifier) : base("LIST")
+		public ListChunk(string identifier) : base(EXPECTED_NAME)
 		{
 			Identifier = identifier;
 			_children = new List<DLSChunk>();
+
+			UpdateSize();
 		}
-		internal ListChunk(EndianBinaryReader reader) : base("LIST", reader)
+		internal ListChunk(EndianBinaryReader reader) : base(EXPECTED_NAME, reader)
 		{
 			long endOffset = GetEndOffset(reader);
 			Identifier = reader.ReadString_Count(4);

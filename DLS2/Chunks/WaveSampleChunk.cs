@@ -5,6 +5,8 @@ namespace Kermalis.DLS2
 {
 	public sealed class WaveSampleChunk : DLSChunk
 	{
+		internal const string EXPECTED_NAME = "wsmp";
+
 		public ushort UnityNote { get; set; }
 		public short FineTune { get; set; }
 		public int Gain { get; set; }
@@ -12,18 +14,20 @@ namespace Kermalis.DLS2
 
 		public WaveSampleLoop? Loop { get; set; } // Combining "SampleLoops" and the loop list
 
-		public WaveSampleChunk() : base("wsmp")
+		public WaveSampleChunk() : base(EXPECTED_NAME)
 		{
 			UnityNote = 60;
 			Loop = null;
+
+			UpdateSize();
 		}
-		internal WaveSampleChunk(EndianBinaryReader reader) : base("wsmp", reader)
+		internal WaveSampleChunk(EndianBinaryReader reader) : base(EXPECTED_NAME, reader)
 		{
 			long endOffset = GetEndOffset(reader);
 			uint byteSize = reader.ReadUInt32();
 			if (byteSize != 20)
 			{
-				throw new InvalidDataException($"wsmp - Wave sample chunk was not 20 bytes! ({byteSize} bytes)");
+				throw new InvalidDataException($"WaveSampleChunk byteSize was not 20 bytes ({byteSize})");
 			}
 
 			UnityNote = reader.ReadUInt16();
@@ -45,7 +49,7 @@ namespace Kermalis.DLS2
 				+ 4 // Gain
 				+ 4 // Options
 				+ 4 // DoesLoop
-				+ (Loop is null ? 0u : 16u); // Loop
+				+ (Loop is null ? 0u : WaveSampleLoop.SIZE); // Loop
 		}
 
 		internal override void Write(EndianBinaryWriter writer)

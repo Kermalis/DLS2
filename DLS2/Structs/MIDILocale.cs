@@ -6,6 +6,8 @@ namespace Kermalis.DLS2
 	// MIDILOCALE - Page 45 of spec
 	public sealed class MIDILocale
 	{
+		internal const int SIZE = 8;
+
 		public uint Bank_Raw { get; set; }
 		public uint Instrument_Raw { get; set; }
 
@@ -64,7 +66,10 @@ namespace Kermalis.DLS2
 			}
 		}
 
-		public MIDILocale() { }
+		public MIDILocale()
+		{
+			//
+		}
 		public MIDILocale(byte cc32, byte cc0, bool isDrum, byte instrument)
 		{
 			CC32 = cc32;

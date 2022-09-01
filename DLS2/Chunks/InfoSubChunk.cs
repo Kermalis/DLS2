@@ -27,6 +27,8 @@ namespace Kermalis.DLS2
 		public InfoSubChunk(string name, string text) : base(name)
 		{
 			Text = text;
+
+			UpdateSize();
 		}
 		internal InfoSubChunk(string name, EndianBinaryReader reader) : base(name, reader)
 		{

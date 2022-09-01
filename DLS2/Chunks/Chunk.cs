@@ -11,13 +11,13 @@ namespace Kermalis.DLS2
 		/// <summary>Size in bytes</summary>
 		protected internal uint Size { get; protected set; }
 
-		protected DLSChunk(string name)
+		protected DLSChunk(string chunkName)
 		{
-			ChunkName = name;
+			ChunkName = chunkName;
 		}
-		protected DLSChunk(string name, EndianBinaryReader reader)
+		protected DLSChunk(string chunkName, EndianBinaryReader reader)
 		{
-			ChunkName = name;
+			ChunkName = chunkName;
 			Size = reader.ReadUInt32();
 		}
 
@@ -25,11 +25,11 @@ namespace Kermalis.DLS2
 		{
 			return reader.Stream.Position + Size;
 		}
-		protected static void EatRemainingBytes(EndianBinaryReader reader, long endOffset)
+		protected void EatRemainingBytes(EndianBinaryReader reader, long endOffset)
 		{
 			if (reader.Stream.Position > endOffset)
 			{
-				throw new InvalidDataException();
+				throw new InvalidDataException($"Chunk was too short ({ChunkName} = {Size})");
 			}
 			reader.Stream.Position = endOffset;
 		}
@@ -52,27 +52,27 @@ namespace Kermalis.DLS2
 			}
 			if (reader.Stream.Position > endOffset)
 			{
-				throw new InvalidDataException();
+				throw new InvalidDataException("Expected to read a certain amount of chunks, but the data was read incorrectly...");
 			}
 			return chunks;
 		}
 		private static DLSChunk SwitchNextChunk(EndianBinaryReader reader)
 		{
-			string str = reader.ReadString_Count(4);
-			switch (str)
+			string chunkName = reader.ReadString_Count(4);
+			switch (chunkName)
 			{
-				case "art1": return new Level1ArticulatorChunk(reader);
-				case "art2": return new Level2ArticulatorChunk(reader);
-				case "colh": return new CollectionHeaderChunk(reader);
-				case "data": return new DataChunk(reader);
-				case "dlid": return new DLSIDChunk(reader);
-				case "fmt ": return new FormatChunk(reader);
-				case "insh": return new InstrumentHeaderChunk(reader);
-				case "LIST": return new ListChunk(reader);
-				case "ptbl": return new PoolTableChunk(reader);
-				case "rgnh": return new RegionHeaderChunk(reader);
-				case "wlnk": return new WaveLinkChunk(reader);
-				case "wsmp": return new WaveSampleChunk(reader);
+				case Level1ArticulatorChunk.EXPECTED_NAME: return new Level1ArticulatorChunk(reader);
+				case Level2ArticulatorChunk.EXPECTED_NAME: return new Level2ArticulatorChunk(reader);
+				case CollectionHeaderChunk.EXPECTED_NAME: return new CollectionHeaderChunk(reader);
+				case DataChunk.EXPECTED_NAME: return new DataChunk(reader);
+				case DLSIDChunk.EXPECTED_NAME: return new DLSIDChunk(reader);
+				case FormatChunk.EXPECTED_NAME: return new FormatChunk(reader);
+				case InstrumentHeaderChunk.EXPECTED_NAME: return new InstrumentHeaderChunk(reader);
+				case ListChunk.EXPECTED_NAME: return new ListChunk(reader);
+				case PoolTableChunk.EXPECTED_NAME: return new PoolTableChunk(reader);
+				case RegionHeaderChunk.EXPECTED_NAME: return new RegionHeaderChunk(reader);
+				case WaveLinkChunk.EXPECTED_NAME: return new WaveLinkChunk(reader);
+				case WaveSampleChunk.EXPECTED_NAME: return new WaveSampleChunk(reader);
 				// InfoSubChunks
 				case "IARL":
 				case "IART":
@@ -90,8 +90,8 @@ namespace Kermalis.DLS2
 				case "ISFT":
 				case "ISRC":
 				case "ISRF":
-				case "ITCH": return new InfoSubChunk(str, reader);
-				default: return new UnsupportedChunk(str, reader);
+				case "ITCH": return new InfoSubChunk(chunkName, reader);
+				default: return new UnsupportedChunk(chunkName, reader);
 			}
 		}
 	}
